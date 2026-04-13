@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# OpenCV / datos pesados
+output/
+*.mp4
+*.avi
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code
+CLAUDE.md
+.claude/
+
+# Información privada / credenciales personales
+data/references/credencial.jpeg
+data/tests/credencial_test2.jpeg
