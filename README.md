@@ -1,4 +1,4 @@
-# P2_Fernando_Zea — Identificación de objetos con descriptores OpenCV
+#Identificación de objetos con descriptores OpenCV
 
 Segundo examen parcial de Visión Computacional — UASLP, Facultad de Ingeniería.
 
