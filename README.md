@@ -10,7 +10,7 @@ Programa en Python que identifica al menos 3 objetos usando tres descriptores di
 |------------|----------------------|-----------|
 | **ORB** | BFMatcher Hamming + Ratio Test (0.75) | 15 good matches |
 | **SIFT** | BFMatcher L2 + Ratio Test (0.75) | 30 good matches |
-| **Canny** | matchTemplate TM_CCOEFF_NORMED | 0.4 (correlación) |
+| **AKAZE** | BFMatcher Hamming + Ratio Test (0.75) | 20 good matches |
 
 ## Instalación
 
@@ -42,12 +42,12 @@ data/tests/
 # Modo imagen estática
 python src/main.py --mode image --descriptor orb --input data/tests/credencial_test1.jpg
 python src/main.py --mode image --descriptor sift --input data/tests/libro_test1.jpg
-python src/main.py --mode image --descriptor canny --input data/tests/caja_test1.jpg
+python src/main.py --mode image --descriptor akaze --input data/tests/caja_test1.jpg
 
 # Modo webcam en tiempo real
 python src/main.py --mode webcam --descriptor orb
 python src/main.py --mode webcam --descriptor sift
-python src/main.py --mode webcam --descriptor canny
+python src/main.py --mode webcam --descriptor akaze
 
 # Benchmark completo (genera results.csv y output/)
 python src/main.py --mode benchmark
@@ -56,7 +56,7 @@ python src/main.py --mode benchmark
 ## Salidas del benchmark
 
 - `results.csv` — tabla con predicción, etiqueta real, score y tiempo por imagen/descriptor
-- `output/` — imágenes anotadas con keypoints, matches y mapas de bordes
+- `output/` — imágenes anotadas con keypoints y matches por descriptor
 
 ## Referencia
 
