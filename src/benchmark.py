@@ -24,7 +24,7 @@ import numpy as np
 # Añadir src/ al path para importar los módulos del proyecto
 sys.path.insert(0, os.path.dirname(__file__))
 
-from descriptors import ORBMatcher, SIFTMatcher, CannyMatcher
+from descriptors import ORBMatcher, SIFTMatcher, AKAZEMatcher
 from classifier import find_id
 from utils import load_images_from_folder, resize_keeping_aspect
 
@@ -56,21 +56,6 @@ def _guardar_imagen_anotada_keypoints(
     nombre_archivo = f"{nombre_descriptor}_{nombre_prueba}_keypoints.jpg"
     cv2.imwrite(os.path.join(RUTA_SALIDA, nombre_archivo), img_kp)
 
-
-def _guardar_imagen_bordes(
-    img: np.ndarray,
-    nombre_prueba: str,
-    umbral_bajo: int = 50,
-    umbral_alto: int = 150,
-) -> None:
-    """
-    Genera el mapa de bordes Canny y guarda la imagen en output/.
-    """
-    gris = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    redim = cv2.resize(gris, (300, 300), interpolation=cv2.INTER_AREA)
-    bordes = cv2.Canny(redim, umbral_bajo, umbral_alto)
-    nombre_archivo = f"canny_{nombre_prueba}_bordes.jpg"
-    cv2.imwrite(os.path.join(RUTA_SALIDA, nombre_archivo), bordes)
 
 
 def _guardar_imagen_matches(
@@ -150,17 +135,17 @@ def correr_benchmark() -> None:
     # --- Inicialización de los 3 matchers ---
     orb = ORBMatcher(nfeatures=1000)
     sift = SIFTMatcher()
-    canny = CannyMatcher(umbral_bajo=50, umbral_alto=150)
+    akaze = AKAZEMatcher()
 
     print("[benchmark] Precalculando descriptores...")
     orb.precompute(referencias_redim)
     sift.precompute(referencias_redim)
-    canny.precompute(referencias_redim)
+    akaze.precompute(referencias_redim)
 
     matchers = [
         ("ORB", orb),
         ("SIFT", sift),
-        ("Canny", canny),
+        ("AKAZE", akaze),
     ]
 
     # --- Evaluación ---
@@ -188,7 +173,7 @@ def correr_benchmark() -> None:
                 "descriptor": nombre_desc,
                 "predicted": clase_pred if clase_pred else "—",
                 "true_label": etiqueta_real if etiqueta_real else "desconocido",
-                "best_score": f"{mejor_score:.4f}",
+                "score": f"{mejor_score:.4f}",
                 "time_ms": f"{tiempo_ms:.2f}",
                 "correct": str(es_correcto),
             })
@@ -200,12 +185,13 @@ def correr_benchmark() -> None:
         # --- Imágenes anotadas ---
         _guardar_imagen_keypoints_prueba(img_redim, orb._detector, "ORB", nombre_prueba)
         _guardar_imagen_keypoints_prueba(img_redim, sift._detector, "SIFT", nombre_prueba)
-        _guardar_imagen_bordes(img_redim, nombre_prueba, 50, 150)
+        _guardar_imagen_keypoints_prueba(img_redim, akaze._detector, "AKAZE", nombre_prueba)
 
-        # Guardar matches con la referencia ganadora de ORB y SIFT
+        # Guardar matches con la referencia ganadora de ORB, SIFT y AKAZE
         for nombre_desc, matcher, norm in [
             ("ORB", orb, cv2.NORM_HAMMING),
             ("SIFT", sift, cv2.NORM_L2),
+            ("AKAZE", akaze, cv2.NORM_HAMMING),
         ]:
             scores = matcher.score_frame(img_redim)
             if scores and max(scores) >= matcher.threshold:
@@ -223,7 +209,7 @@ def correr_benchmark() -> None:
 
     # --- Escribir CSV ---
     campos = ["test_image", "descriptor", "predicted", "true_label",
-              "best_score", "time_ms", "correct"]
+              "score", "time_ms", "correct"]
     with open(RUTA_CSV, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=campos)
         writer.writeheader()
@@ -282,14 +268,14 @@ def _imprimir_tabla(filas: list[dict]) -> None:
     ancho = 78
     print("\n" + "=" * ancho)
     print(f"{'IMAGEN':<22} {'DESCRIPTOR':<8} {'PREDICCIÓN':<16} {'REAL':<16} "
-          f"{'SCORE':>7} {'ms':>7}")
+          f"{'SCORE':>8} {'ms':>7}")
     print("-" * ancho)
 
     for fila in filas:
         print(
             f"{fila['test_image']:<22} {fila['descriptor']:<8} "
             f"{fila['predicted']:<16} {fila['true_label']:<16} "
-            f"{fila['best_score']:>7} {fila['time_ms']:>7}"
+            f"{fila['score']:>8} {fila['time_ms']:>7}"
         )
 
     print("=" * ancho)

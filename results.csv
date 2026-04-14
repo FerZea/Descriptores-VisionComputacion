@@ -1,0 +1,10 @@
+test_image,descriptor,predicted,true_label,score,time_ms,correct
+credencial_test2,ORB,credencial,credencial,232.0000,8.10,True
+credencial_test2,SIFT,credencial,credencial,794.0000,46.97,True
+credencial_test2,AKAZE,credencial,credencial,369.0000,19.30,True
+libro_test1,ORB,libro,libro,138.0000,9.01,True
+libro_test1,SIFT,libro,libro,625.0000,50.28,True
+libro_test1,AKAZE,libro,libro,359.0000,25.11,True
+videojuego_test3,ORB,videojuego,videojuego,259.0000,8.52,True
+videojuego_test3,SIFT,videojuego,videojuego,426.0000,47.22,True
+videojuego_test3,AKAZE,videojuego,videojuego,304.0000,24.83,True

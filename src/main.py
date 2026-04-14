@@ -23,7 +23,7 @@ import cv2
 # Añadir src/ al path para importar los módulos del proyecto
 sys.path.insert(0, os.path.dirname(__file__))
 
-from descriptors import ORBMatcher, SIFTMatcher, CannyMatcher
+from descriptors import ORBMatcher, SIFTMatcher, AKAZEMatcher
 from classifier import find_id
 from utils import load_images_from_folder, resize_keeping_aspect, draw_label
 
@@ -53,10 +53,10 @@ def _crear_matcher(nombre_descriptor: str):
         return ORBMatcher(nfeatures=1000)
     if nombre_lower == "sift":
         return SIFTMatcher()
-    if nombre_lower == "canny":
-        return CannyMatcher()
+    if nombre_lower == "akaze":
+        return AKAZEMatcher()
     raise ValueError(f"Descriptor desconocido: '{nombre_descriptor}'. "
-                     f"Opciones: orb, sift, canny.")
+                     f"Opciones: orb, sift, akaze.")
 
 
 def _cargar_y_preparar_referencias(matcher) -> bool:
@@ -177,6 +177,21 @@ def modo_webcam(descriptor: str) -> None:
         # Dibujar etiqueta sobre el frame (igual que en el video de referencia)
         draw_label(frame_redim, etiqueta, pos=(20, 50))
 
+        # Mostrar scores individuales por clase para diagnóstico
+        if scores and matcher.class_names:
+            for i, (nombre, score) in enumerate(zip(matcher.class_names, scores)):
+                debug_texto = f"{nombre}: {score:.2f} / {matcher.threshold}"
+                cv2.putText(
+                    frame_redim,
+                    debug_texto,
+                    (20, 90 + i * 25),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.55,
+                    (255, 255, 0),
+                    1,
+                    cv2.LINE_AA,
+                )
+
         cv2.imshow(nombre_ventana, frame_redim)
 
         if cv2.waitKey(30) & 0xFF == ord("q"):
@@ -215,7 +230,7 @@ def _construir_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--descriptor",
-        choices=["orb", "sift", "canny"],
+        choices=["orb", "sift", "akaze"],
         default="orb",
         help="Descriptor a usar (solo para --mode image y --mode webcam).",
     )
